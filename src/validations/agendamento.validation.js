@@ -4,4 +4,9 @@ const createAgendamentoSchema = z.object({
   dataHora: z.string().datetime(),
 });
 
-module.exports = { createAgendamentoSchema };
+const cancelAgendamentoSchema = z.object({});
+
+
+module.exports = { createAgendamentoSchema,
+    cancelAgendamentoSchema
+};
