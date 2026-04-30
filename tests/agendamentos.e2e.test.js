@@ -3,8 +3,23 @@ const app = require("../src/app");
 const { prisma } = require("../src/lib/prisma");
 
 describe("Fluxo de agendamento", () => {
+    beforeEach(async () => {
+  await prisma.agendamento.deleteMany();
+  await prisma.atendimento.deleteMany();
+  await prisma.refreshToken.deleteMany();
+  await prisma.user.deleteMany();
+});
+
   let token;
   const email = `cliente_${Date.now()}@email.com`;
+
+  function getFutureDate(hoursAhead = 1) {
+  return new Date(
+    Date.now() +
+    hoursAhead * 60 * 60 * 1000 +
+    Math.floor(Math.random() * 60000) 
+  ).toISOString();
+}
 
   it("deve registrar, logar e criar agendamento", async () => {
     const registerRes = await request(app).post("/auth/register").send({
@@ -29,7 +44,7 @@ describe("Fluxo de agendamento", () => {
 
     token = loginRes.body.accessToken;
 
-    const futureDate = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const futureDate = getFutureDate(2);
 
     const createRes = await request(app)
       .post("/agendamentos")
@@ -62,7 +77,7 @@ describe("Fluxo de agendamento", () => {
 
   const token = loginRes.body.accessToken;
 
-  const date = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+  const date = getFutureDate(2);
 
   const first = await request(app)
     .post("/agendamentos")
@@ -96,7 +111,7 @@ it("não deve permitir cancelar com menos de 2h de antecedência", async () => {
 
   const token = loginRes.body.accessToken;
 
-  const date = new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString();
+  const date = getFutureDate(1);
 
   const create = await request(app)
     .post("/agendamentos")
@@ -113,6 +128,58 @@ it("não deve permitir cancelar com menos de 2h de antecedência", async () => {
 
   expect(cancel.status).toBe(409);
 });
+
+it("cliente não deve acessar agendamento de outro cliente", async () => {
+  const email1 = `cliente1_${Date.now()}@email.com`;
+
+  await request(app).post("/auth/register").send({
+    name: "Cliente 1",
+    email: email1,
+    password: "123456",
+    role: "cliente",
+  });
+
+  const login1 = await request(app).post("/auth/login").send({
+    email: email1,
+    password: "123456",
+  });
+
+  const token1 = login1.body.accessToken;
+
+  const date = getFutureDate(2);
+
+  const agendamento = await request(app)
+    .post("/agendamentos")
+    .set("Authorization", `Bearer ${token1}`)
+    .send({ dataHora: date });
+
+  expect(agendamento.status).toBe(201);
+
+  const agendamentoId = agendamento.body.id;
+
+  const email2 = `cliente2_${Date.now()}@email.com`;
+
+  await request(app).post("/auth/register").send({
+    name: "Cliente 2",
+    email: email2,
+    password: "123456",
+    role: "cliente",
+  });
+
+  const login2 = await request(app).post("/auth/login").send({
+    email: email2,
+    password: "123456",
+  });
+
+  const token2 = login2.body.accessToken;
+
+  const response = await request(app)
+    .get(`/agendamentos/${agendamentoId}`)
+    .set("Authorization", `Bearer ${token2}`);
+
+  expect(response.status).toBe(403); // ou 403 dependendo da sua regra
+});
+
 });
 
 afterAll(async () => {
