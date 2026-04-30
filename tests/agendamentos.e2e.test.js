@@ -180,6 +180,54 @@ it("cliente não deve acessar agendamento de outro cliente", async () => {
   expect(response.status).toBe(403); // ou 403 dependendo da sua regra
 });
 
+it("admin deve acessar qualquer agendamento", async () => {
+  const emailCliente = `cliente_admin_view_${Date.now()}@email.com`;
+  const emailAdmin = `admin_view_${Date.now()}@email.com`;
+
+  await request(app).post("/auth/register").send({
+    name: "Cliente View",
+    email: emailCliente,
+    password: "123456",
+    role: "cliente",
+  });
+
+  await request(app).post("/auth/register").send({
+    name: "Admin View",
+    email: emailAdmin,
+    password: "123456",
+    role: "admin",
+  });
+
+  const loginCliente = await request(app).post("/auth/login").send({
+    email: emailCliente,
+    password: "123456",
+  });
+
+  const loginAdmin = await request(app).post("/auth/login").send({
+    email: emailAdmin,
+    password: "123456",
+  });
+
+  const tokenCliente = loginCliente.body.accessToken;
+  const tokenAdmin = loginAdmin.body.accessToken;
+
+  const date = getFutureDate(3);
+
+  const agendamento = await request(app)
+    .post("/agendamentos")
+    .set("Authorization", `Bearer ${tokenCliente}`)
+    .send({ dataHora: date });
+
+  expect(agendamento.status).toBe(201);
+
+  const response = await request(app)
+    .get(`/agendamentos/${agendamento.body.id}`)
+    .set("Authorization", `Bearer ${tokenAdmin}`);
+
+  expect(response.status).toBe(200);
+  expect(response.body.id).toBe(agendamento.body.id);
+});
+
 });
 
 afterAll(async () => {
