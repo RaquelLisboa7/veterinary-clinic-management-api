@@ -121,7 +121,56 @@ async function cancel({ agendamentoId, actor }) {
   });
 }
 
+async function findAll(actor) {
+ const where = {};
+
+if (actor.role === "cliente") {
+  where.userId = actor.userId;
+}
+
+  return prisma.agendamento.findMany({
+    where,
+    include: {
+      user: true,
+      atendimento: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  
+}
+
+async function findById(id, actor) {
+  const agendamento = await prisma.agendamento.findUnique({
+    where: { id },
+    include: {
+  user: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+    },
+  },
+  atendimento: true,
+  }
+  });
+
+  if (!agendamento) {
+    throw new AppError("Agendamento não encontrado", 404);
+  }
+
+  if (actor.role === "cliente" && agendamento.userId !== actor.userId) {
+    throw new AppError("Acesso negado", 403);
+  }
+
+  return agendamento;
+}
+
 module.exports = {
   create,
   cancel,
+  findAll,
+  findById,
 };

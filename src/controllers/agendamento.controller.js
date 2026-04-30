@@ -35,6 +35,37 @@ async function cancel(req, res, next) {
   }
 }
 
-module.exports = { create,
-    cancel
+async function index(req, res, next) {
+  try {
+    const agendamentos = await agendamentoService.findAll({
+      userId: Number(req.user.sub),
+      role: req.user.role,
+    });
+
+    return res.status(200).json(agendamentos);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function show(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const agendamento = await agendamentoService.findById(Number(id), {
+      userId: Number(req.user.sub),
+      role: req.user.role,
+    });
+
+    return res.status(200).json(agendamento);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { 
+    create,
+    cancel,
+    index,
+    show
  };
