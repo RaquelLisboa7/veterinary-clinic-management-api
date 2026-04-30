@@ -79,6 +79,40 @@ describe("Fluxo de agendamento", () => {
   expect(second.status).toBe(409);
 });
   
+it("não deve permitir cancelar com menos de 2h de antecedência", async () => {
+  const email = `cliente_cancel_${Date.now()}@email.com`;
+
+  await request(app).post("/auth/register").send({
+    name: "Cliente Cancel",
+    email,
+    password: "123456",
+    role: "cliente",
+  });
+
+  const loginRes = await request(app).post("/auth/login").send({
+    email,
+    password: "123456",
+  });
+
+  const token = loginRes.body.accessToken;
+
+  const date = new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString();
+
+  const create = await request(app)
+    .post("/agendamentos")
+    .set("Authorization", `Bearer ${token}`)
+    .send({ dataHora: date });
+
+  expect(create.status).toBe(201);
+
+  const agendamentoId = create.body.id;
+
+  const cancel = await request(app)
+    .patch(`/agendamentos/${agendamentoId}/cancelar`)
+    .set("Authorization", `Bearer ${token}`);
+
+  expect(cancel.status).toBe(409);
+});
 });
 
 afterAll(async () => {
