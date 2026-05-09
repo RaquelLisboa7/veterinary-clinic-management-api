@@ -1,165 +1,300 @@
-💡 Visão geral
-Pequena aplicação CRUD organizada por camadas:
-config/db.js — conexão / wrapper simples para MongoDB.
-controllers/* — lógica de cada recurso.
-repositories/* — repositório por coleção (usa config/db.js).
-routes/* — rotas Express por recurso.
-server.js — servidor Express principal.
-Objetivo: exemplificar organização de uma API REST com validações básicas e persistência em MongoDB.
+# 🐾 Petshop API — Sistema Backend Completo para Gestão Veterinária
 
-✅ Funcionalidades
-CRUD para pet, dono, servico (nome, preço etc.)
-CRUD para atendimento (registro de serviços prestados a pets/donos)
-Validações básicas no controller (campos obrigatórios)
-Persistência em MongoDB (database petshop)
+API RESTful profissional desenvolvida para gerenciamento de um petshop/clínica veterinária, com autenticação JWT, controle de permissões por cargos, fluxo completo de agendamentos, atendimentos, pagamentos e prontuários veterinários.
 
-📁 Estrutura principal
-.
-├─ config/
-│  └─ db.js
-├─ controllers/
-│  ├─ AtendimentoController.js
-│  ├─ DonoController.js
-│  ├─ PetController.js
-│  └─ ServicoController.js
-├─ repositories/
-│  ├─ AtendimentoReposity.js
-│  ├─ DonoReposity.js
-│  ├─ PetReposity.js
-│  └─ ServicoReposity.js
-├─ routes/
-│  ├─ atendimento.js
-│  ├─ dono.js
-│  ├─ pet.js
-│  └─ servico.js
-└─ server.js
+Projeto focado em arquitetura backend moderna, regras de negócio reais, segurança, escalabilidade e testes automatizados.
 
-🛠 Requisitos
-Node.js (recomendo v18+)
-MongoDB rodando localmente (ou URI para Mongo Atlas)
-NPM ou Yarn
+---
 
-⚙️ Instalação (exemplo)
+# ✨ Funcionalidades
 
-Clone o repositório:
-git clone https://github.com/RaquelLisboa28/PetShop-API-Backend-Express-MongoDB.git
-cd PetShop-API-Backend-Express-MongoDB
+## 🔐 Autenticação e Autorização
+- Cadastro de usuários
+- Login com JWT
+- Refresh Token
+- Logout seguro
+- Controle de acesso por cargos (RBAC)
 
+### Perfis suportados
+- `admin`
+- `atendente`
+- `veterinario`
+- `cliente`
 
-Instale dependências:
-npm init -y
-npm i express mongodb
-npm i -D nodemon
+---
 
+## 📅 Agendamentos
+- Criar agendamentos
+- Cancelar agendamentos
+- Impedir conflitos de horário
+- Regras de antecedência mínima
+- Controle de acesso por usuário
+- Admin pode visualizar/agendar para todos
 
-package.json (exemplo mínimo para rodar):
+---
 
-{
-  "name": "petshop-api",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
-  "dependencies": {
-    "express": "^4.x",
-    "mongodb": "^5.x"
-  }
-}
+## 🩺 Atendimento Veterinário
+- Criação de atendimento a partir de agendamento confirmado
+- Controle de status do atendimento
+- Bloqueio de avanço sem pagamento aprovado
+- Fluxo operacional completo
 
+---
 
-Inicie o MongoDB (local) e rode a API:
+## 💳 Pagamentos
+- Pagamentos pendentes
+- Aprovação de pagamento
+- Recusa de pagamento
+- Integração com fluxo de atendimento
+
+---
+
+## 📋 Prontuário Veterinário
+- Histórico médico do pet
+- Criação de itens no prontuário
+- Registro de consultas
+- Controle de acesso por perfil
+- Cliente pode visualizar apenas o próprio pet
+
+---
+
+## 🛡️ Segurança
+- JWT Authentication
+- Helmet
+- Rate Limiting
+- Validação com Zod
+- Middlewares de autenticação
+- Middlewares de autorização
+
+---
+
+## 📚 Documentação Swagger
+A API possui documentação interativa via Swagger.
+
+### Endpoint:
+```bash
+/docs
+```
+
+---
+
+# 🧱 Tecnologias Utilizadas
+
+## Backend
+- Node.js
+- Express.js
+
+## Banco de Dados
+- PostgreSQL
+- Prisma ORM
+
+## Segurança
+- JWT
+- bcrypt
+- Helmet
+- express-rate-limit
+
+## Validação
+- Zod
+
+## Testes
+- Jest
+- Supertest
+
+## Documentação
+- Swagger OpenAPI
+
+---
+
+# 🧪 Testes Automatizados
+
+O projeto possui testes E2E cobrindo os principais fluxos da aplicação:
+
+✅ Autenticação  
+✅ Agendamentos  
+✅ Atendimento  
+✅ Pagamentos  
+✅ Prontuário  
+
+### Resultado atual:
+```bash
+Test Suites: 3 passed
+Tests: 14 passed
+```
+
+---
+
+# 📂 Estrutura do Projeto
+
+```bash
+src/
+├── controllers/
+├── middlewares/
+├── routes/
+├── schemas/
+├── services/
+├── prisma/
+├── docs/
+├── utils/
+├── server.js
+└── app.js
+```
+
+---
+
+# ⚙️ Instalação
+
+## 1. Clonar repositório
+
+```bash
+git clone https://github.com/RaquelLisboa7/Petshop.git
+```
+
+---
+
+## 2. Instalar dependências
+
+```bash
+npm install
+```
+
+---
+
+## 3. Configurar variáveis de ambiente
+
+Crie um arquivo `.env`
+
+```env
+DATABASE_URL=""
+JWT_SECRET=""
+REFRESH_TOKEN_SECRET=""
+PORT=6500
+```
+
+---
+
+## 4. Rodar migrations
+
+```bash
+npx prisma migrate dev
+```
+
+---
+
+## 5. Rodar servidor
+
+```bash
 npm run dev
-# ou
-npm start
+```
 
-O servidor iniciará na porta 6500 (conforme server.js): http://localhost:6500.
+Servidor:
+```bash
+http://localhost:6500
+```
 
-🔌 Conexão com MongoDB
-Atualmente a conexão está em config/db.js usando:
+---
 
-const uri = "mongodb://localhost:27017"
-const client = new MongoClient(uri)
+# 🚀 Scripts Disponíveis
 
+## Rodar ambiente de desenvolvimento
 
-Se quiser usar conexão por variável de ambiente (recomendado), substitua uri por process.env.MONGO_URI e carregue com dotenv.
+```bash
+npm run dev
+```
 
-🧭 Endpoints (base: http://localhost:6500)
-Recurso pet
-GET /pet/ — listar todos os pets
-GET /pet/:id — obter pet por _id
-POST /pet/ — criar pet
+## Rodar testes
 
-Body JSON obrigatório (exemplo):
+```bash
+npm test
+```
 
-{
-  "nome": "Rex",
-  "sexo": "M",
-  "raca": "Vira-lata",
-  "idade": 3
-}
+## Prisma Studio
 
-PUT /pet/:id — atualizar pet (body com campos a alterar)
-DELETE /pet/:id — remover pet
+```bash
+npx prisma studio
+```
 
-Recurso dono
-GET /dono/
-GET /dono/:id
-POST /dono/ — criar dono
+---
 
-{
-  "nome": "Ana",
-  "idade": 30,
-  "contato": "1199999-9999"
-}
+# 🔄 Fluxo de Negócio
 
-PUT /dono/:id
-DELETE /dono/:id
+## Fluxo principal do sistema
 
-Recurso servico
+```text
+Usuário agenda atendimento
+        ↓
+Agendamento confirmado
+        ↓
+Atendimento criado
+        ↓
+Pagamento gerado
+        ↓
+Pagamento aprovado
+        ↓
+Atendimento pode avançar
+        ↓
+Veterinário registra prontuário
+```
 
-GET /servico/
-GET /servico/:id
-POST /servico/ — criar serviço
+---
 
-{
-  "nome": "Banho e Tosa",
-  "preco": 80
-}
+# 🎯 Objetivos Técnicos do Projeto
 
+Este projeto foi desenvolvido com foco em:
 
-PUT /servico/:id
-DELETE /servico/:id
+- Arquitetura backend organizada
+- Boas práticas REST
+- Separação de responsabilidades
+- Regras de negócio reais
+- Escalabilidade
+- Segurança
+- Testes automatizados
+- Código limpo e sustentável
 
-Recurso atendimento
+---
 
-GET /atendimento/
-GET /atendimento/:id
-POST /atendimento/ — criar atendimento (necessita petId, donoId, servicoId)
+# 📌 Principais Conceitos Aplicados
 
-{
-  "petId": "64f5a1b2c3d4e5f678901234",
-  "donoId": "64f5a1b2c3d4e5f678901235",
-  "servicoId": "64f5a1b2c3d4e5f678901236",
-  "observacoes": "Chegou sujo"
-}
+- REST API
+- Middleware Pattern
+- RBAC (Role-Based Access Control)
+- JWT Authentication
+- Validation Layer
+- Error Handling
+- ORM Pattern
+- E2E Testing
+- Modular Architecture
 
+---
 
-PUT /atendimento/:id
-DELETE /atendimento/:id
+# 👩‍💻 Desenvolvido por
 
-📌 Exemplos curl
+## Raquel Lisboa
 
-Criar um pet:
-curl -X POST http://localhost:6500/pet \
-  -H "Content-Type: application/json" \
-  -d '{"nome":"Rex","sexo":"M","raca":"Vira-lata","idade":3}'
+Desenvolvedora Backend focada em:
+- Node.js
+- APIs REST
+- PostgreSQL
+- Prisma ORM
+- Arquitetura Backend
+- Segurança de aplicações
+- Testes automatizados
 
-Listar donos:
-curl http://localhost:6500/dono
+---
 
-Criar atendimento (exemplo):
-curl -X POST http://localhost:6500/atendimento \
-  -H "Content-Type: application/json" \
-  -d '{"petId":"<petId>","donoId":"<donoId>","servicoId":"<servicoId>","observacoes":"..."}'
+# ⭐ Diferenciais do Projeto
+
+✅ Fluxo completo de negócio  
+✅ Arquitetura escalável  
+✅ Sistema de permissões  
+✅ Segurança aplicada  
+✅ Testes E2E reais  
+✅ Swagger documentado  
+✅ Regras de negócio complexas  
+✅ Projeto preparado para deploy e Docker  
+
+---
+
+# 📄 Licença
+
+Projeto desenvolvido para fins educacionais e portfólio.
